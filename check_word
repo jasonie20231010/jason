@@ -1,0 +1,108 @@
+针对不同url进行文档遍历
+import requests
+import re
+
+# 下载文本文档
+def download_text(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        return None
+
+# 检查是否存在特定的关键词
+def check_keywords(text, keywords):
+    matches_server = re.findall(r'object-group network server([\s\S]*?)object-group network', text)
+    for match in matches_server:
+        for keyword in keywords:
+            # 检查是否包含特定词汇
+            if re.search(rf'\b{keyword}\b', match):
+                ip_references = re.findall(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', match)
+                print(f"Warning: '{keyword}' found in 'object-group network server' section.")
+                print("Related IP references:", ip_references)
+
+    matches_temp = re.findall(r'object-group network temp([\s\S]*?)object-group network', text)
+    for match in matches_temp:
+        ips = re.findall(r'\b(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b', match)
+        for ip in ips:
+            if ip != '1.1.1.1':
+                print("Warning: IP found in 'object-group network temp' section, excluding 1.1.1.1.")
+                print("Related IP reference:", ip)
+
+# 主函数
+def main():
+    url_keywords = {
+        'URL1': ['word1', 'word2', 'word3'],
+        'URL2': ['word1', 'word2'],
+        # 添加更多的 URL 和关键词
+    }
+
+    for url, keywords in url_keywords.items():
+        # 下载文本文档
+        document_text = download_text(url)
+
+        if document_text:
+            # 检查关键词
+            check_keywords(document_text, keywords)
+        else:
+            print(f"Failed to download the document from {url}.")
+
+if __name__ == "__main__":
+    main()
+
+
+##针对多个url逐一遍历
+import requests
+import re
+
+# 下载文本文档
+def download_text(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        return None
+
+# 检查是否存在特定的关键词
+def check_keywords(text):
+    # 匹配object-group network server到下一个object-group network之间的内容
+    matches_server = re.findall(r'object-group network server([\s\S]*?)object-group network', text)
+    for match in matches_server:
+        # 检查是否包含特定词汇：word1, word2, word3, word4
+        if re.search(r'\b(?:word1|word2|word3|word4)\b', match):
+            # 获取相关的IP参考
+            ip_references = re.findall(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', match)
+            print("Warning: Words found in 'object-group network server' section.")
+            print("Related IP references:", ip_references)
+
+    # 匹配object-group network temp到下一个object-group network之间的内容
+    matches_temp = re.findall(r'object-group network temp([\s\S]*?)object-group network', text)
+    for match in matches_temp:
+        # 检查是否包含除1.1.1.1之外的其他IP
+        ips = re.findall(r'\b(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b', match)
+        for ip in ips:
+            if ip != '1.1.1.1':
+                print("Warning: IP found in 'object-group network temp' section, excluding 1.1.1.1.")
+                print("Related IP reference:", ip)
+
+# 主函数
+def main():
+    urls = [
+        'URL1',
+        'URL2',
+        # Add more URLs as needed
+    ]
+
+    for url in urls:
+        # 下载文本文档
+        document_text = download_text(url)
+
+        if document_text:
+            # 检查关键词
+            check_keywords(document_text)
+        else:
+            print(f"Failed to download the document from {url}.")
+
+if __name__ == "__main__":
+    main()
+1
