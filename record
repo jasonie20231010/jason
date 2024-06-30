@@ -16,7 +16,87 @@ https://uleshi.com
 理论课实验作业账号密码：CCIE114-13--------5963786681
 
 这是云实验室账号密码，登入云实验室即可使用，前面是账号，后面是密码，请注意保存账号密码。
-云实验室链接：https://asr.lab.spoto.cloud/                            ps:建议使用火狐浏览器，结课一周后不能使用哦
+云实验室链接：https://asr.lab.spoto.cloud/                            ps:建议使用火狐浏览器，结课一周后不能使用启用SYN Cookies是防御SYN洪水攻击的一种有效方法。在Cisco ASA设备上，可以通过配置来启用SYN Cookies。以下是详细的步骤和解释：
+
+### SYN洪水攻击和SYN Cookies的作用
+
+**SYN洪水攻击**：攻击者发送大量伪造源IP地址的SYN请求，目标服务器会为每个SYN请求分配资源并等待SYN-ACK的响应。这会导致服务器资源耗尽，无法处理合法请求。
+
+**SYN Cookies**：SYN Cookies通过在TCP三次握手过程中不立即分配资源，而是通过计算一个特殊的加密响应（SYN-ACK），只有在收到正确的ACK时才分配资源，从而防止服务器资源被耗尽。
+
+### 启用SYN Cookies的配置步骤
+
+以下是如何在Cisco ASA设备上启用SYN Cookies的详细步骤：
+
+#### 1. 进入配置模式
+
+首先，通过命令行接口（CLI）进入配置模式：
+
+```shell
+enable
+configure terminal
+```
+
+#### 2. 启用SYN Cookies
+
+启用SYN Cookies，使用以下命令：
+
+```shell
+hostname(config)# tcp-options syn-cookie
+```
+
+#### 3. 配置防火墙策略
+
+可以结合防火墙策略和访问控制列表（ACL）来进一步增强防御。例如，限制每个IP地址的SYN请求速率：
+
+```shell
+class-map SYN_ATTACK
+ match port tcp eq 53
+
+policy-map OUTSIDE_POLICY
+ class SYN_ATTACK
+  set connection random-sequence-number
+  set connection embryonic-conn-max 1000 per-client
+
+service-policy OUTSIDE_POLICY interface outside
+```
+
+#### 4. 验证配置
+
+配置完成后，可以使用以下命令验证SYN Cookies是否启用以及防火墙策略是否生效：
+
+```shell
+show running-config | include syn-cookie
+show service-policy interface outside
+```
+
+### 配置解释
+
+- `tcp-options syn-cookie`：启用SYN Cookies功能。
+- `class-map SYN_ATTACK`：创建一个类映射，匹配特定端口（如TCP端口53，DNS使用的端口）。
+- `policy-map OUTSIDE_POLICY`：创建一个策略映射，应用于匹配的类。
+  - `set connection random-sequence-number`：设置随机序列号，增强安全性。
+  - `set connection embryonic-conn-max 1000 per-client`：限制每个客户端的半开连接数（embryonic connections）最大为1000，防止单个IP地址发起过多连接。
+- `service-policy OUTSIDE_POLICY interface outside`：将策略映射应用到外部接口。
+
+### 进一步优化和防御
+
+1. **调整超时设置**：可以调整SYN-ACK等待时间，及时清理半开连接：
+
+```shell
+hostname(config)# timeout half-closed 10
+hostname(config)# timeout wait-terminate 2
+```
+
+2. **监控和报警**：配置实时监控和报警机制，及时发现和响应异常流量：
+
+```shell
+hostname(config)# logging enable
+hostname(config)# logging trap warnings
+hostname(config)# logging host inside <IP_address_of_syslog_server>
+```
+
+通过这些步骤，可以在Cisco ASA设备上启用和配置SYN Cookies，有效防御SYN洪水攻击，并结合其他策略进一步增强网络安全性。
 
 
 
