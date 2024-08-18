@@ -99,7 +99,7 @@ hostname(config)# logging host inside <IP_address_of_syslog_server>
 通过这些步骤，可以在Cisco ASA设备上启用和配置SYN Cookies，有效防御SYN洪水攻击，并结合其他策略进一步增强网络安全性。
 
 
-
+https://github.com/icefire-ken/Devices_Inspection
 
 
 https://mp.weixin.qq.com/s?__biz=MzA4OTk4NDg3OA==&mid=2652281357&idx=1&sn=e39ad3eabe8f19574c3ca16b55770857&chksm=8bf0a00cbc87291a211b0360ad2ea1a9c4f890ed0ec3275b5b053aa281c72fe19f8f3ad761c5&scene=21#wechat_redirect
